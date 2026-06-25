@@ -4,9 +4,7 @@
   "schedule": ["every 1 hour after 9am and before 6pm every weekday"],
   "timezone": "Asia/Singapore",
   "enabledManagers": ["docker-compose", "terraform"],
-  "docker": {
-    "versioning": "semver"
-  },
+  "separateMinorPatch": true,
   "packageRules": [
     {
       "description": "Patch updates for Docker images",
