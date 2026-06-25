@@ -23,9 +23,11 @@
       "labels": ["dependencies", "docker", "patch"]
     },
     {
-      "description": "Disable minor and major updates",
+      "description": "Minor and major updates require manual review",
+      "matchDatasources": ["docker"],
       "matchUpdateTypes": ["minor", "major"],
-      "enabled": false
+      "automerge": false,
+      "labels": ["dependencies", "docker"]
     },
     {
       "description": "Do not touch images using non-semver tags (main, latest, etc.)",
