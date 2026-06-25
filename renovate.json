@@ -21,7 +21,8 @@
       "matchDatasources": ["docker"],
       "matchUpdateTypes": ["patch"],
       "automerge": true,
-      "automergeType": "branch",
+      "automergeType": "pr",
+      "automergeStrategy": "squash",
       "labels": ["dependencies", "docker", "patch"]
     },
     {
