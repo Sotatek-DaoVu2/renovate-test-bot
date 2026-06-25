@@ -93,7 +93,7 @@ services:
           memory: 128M
 
   open-webui:
-    image: ghcr.io/open-webui/open-webui:v0.8.6
+    image: ghcr.io/open-webui/open-webui:v0.9.6
     container_name: dv-ai-open-webui
     restart: unless-stopped
     depends_on:
