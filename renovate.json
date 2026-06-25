@@ -19,7 +19,9 @@
       "description": "Patch updates for Docker images",
       "matchDatasources": ["docker"],
       "matchUpdateTypes": ["patch"],
-      "automerge": false,
+      "automerge": true,
+      "automergeType": "pr",
+      "automergeStrategy": "squash",
       "labels": ["dependencies", "docker", "patch"]
     },
     {
