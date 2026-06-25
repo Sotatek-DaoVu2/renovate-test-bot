@@ -3,7 +3,16 @@
   "extends": ["config:recommended"],
   "schedule": ["every 1 hour after 9am and before 6pm every weekday"],
   "timezone": "Asia/Singapore",
-  "enabledManagers": ["docker-compose", "terraform"],
+  "enabledManagers": ["docker-compose", "terraform", "custom.regex"],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Docker images in Terraform files",
+      "fileMatch": ["\\.tf$"],
+      "matchStrings": ["image\\s*=\\s*\"(?<depName>[^\"]+?):(?<currentValue>[^\"]+)\""],
+      "datasourceTemplate": "docker"
+    }
+  ],
   "separateMinorPatch": true,
   "packageRules": [
     {
