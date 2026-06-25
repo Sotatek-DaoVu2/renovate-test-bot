@@ -1,0 +1,171 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: dv-ai-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-openwebui}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-openwebui}
+      POSTGRES_DB: ${POSTGRES_DB:-openwebui}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5433"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-openwebui}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: ${POSTGRES_CPU_LIMIT:-2}
+          memory: ${POSTGRES_MEMORY_LIMIT:-2G}
+        reservations:
+          cpus: ${POSTGRES_CPU_RESERVATION:-0.5}
+          memory: ${POSTGRES_MEMORY_RESERVATION:-512M}
+
+  litellm:
+    image: ghcr.io/berriai/litellm:main-latest
+    container_name: dv-ai-litellm
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "${LITELLM_PORT:-4000}:4000"
+    volumes:
+      - ./litellm-config.yaml:/app/config.yaml
+    env_file:
+      - .env
+    environment:
+      AZURE_AI_API_KEY: ${AZURE_AI_API_KEY}
+      AZURE_OPENAI_ENDPOINT: ${AZURE_OPENAI_ENDPOINT}
+      AZURE_CLAUDE_ENDPOINT: ${AZURE_CLAUDE_ENDPOINT}
+      AZURE_BEARER_AUTH: ${AZURE_BEARER_AUTH}
+      LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY:-sk-litellm-poc-key}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-openwebui}:${POSTGRES_PASSWORD:-openwebui}@postgres:5432/litellm
+      STORE_MODEL_IN_DB: "True"
+    command: ["--config", "/app/config.yaml", "--port", "4000"]
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:4000/health/liveliness')"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: ${LITELLM_CPU_LIMIT:-2}
+          memory: ${LITELLM_MEMORY_LIMIT:-2G}
+        reservations:
+          cpus: ${LITELLM_CPU_RESERVATION:-0.5}
+          memory: ${LITELLM_MEMORY_RESERVATION:-512M}
+
+  pipelines:
+    image: ghcr.io/open-webui/pipelines:main
+    container_name: dv-ai-pipelines
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "${PIPELINES_PORT:-9099}:9099"
+    volumes:
+      - ./pipelines:/app/pipelines
+    environment:
+      PIPELINES_API_KEY: "0p3n-w3bu!"
+      AUDIT_DB_HOST: postgres
+      AUDIT_DB_PORT: "5432"
+      AUDIT_DB_USER: ${POSTGRES_USER:-openwebui}
+      AUDIT_DB_PASSWORD: ${POSTGRES_PASSWORD:-openwebui}
+      AUDIT_DB_NAME: ${POSTGRES_DB:-openwebui}
+      AUDIT_DB_POOL_MIN: ${AUDIT_DB_POOL_MIN:-1}
+      AUDIT_DB_POOL_MAX: ${AUDIT_DB_POOL_MAX:-5}
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 128M
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:v0.8.6
+    container_name: dv-ai-open-webui
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      litellm:
+        condition: service_healthy
+      pipelines:
+        condition: service_started
+    ports:
+      - "${OPEN_WEBUI_PORT:-3000}:8080"
+    environment:
+      OPENAI_API_BASE_URLS: "http://litellm:4000/v1;http://pipelines:9099"
+      OPENAI_API_KEYS: "${LITELLM_MASTER_KEY:-sk-litellm-poc-key};0p3n-w3bu!"
+      DATABASE_URL: postgresql://${POSTGRES_USER:-openwebui}:${POSTGRES_PASSWORD:-openwebui}@postgres:5432/${POSTGRES_DB:-openwebui}
+      WEBUI_AUTH: "true"
+      ENABLE_SIGNUP: ${ENABLE_SIGNUP:-true}
+      RAG_EMBEDDING_ENGINE: openai
+      RAG_EMBEDDING_MODEL: text-embedding-3-small
+      RAG_OPENAI_API_BASE_URL: http://litellm:4000/v1
+      RAG_OPENAI_API_KEY: ${LITELLM_MASTER_KEY:-sk-litellm-poc-key}
+      WEBUI_NAME: "LibearaGPT"
+      ENABLE_RAG_WEB_SEARCH: "false"
+      ENABLE_OAUTH_SIGNUP: "true"
+      ENABLE_LOGIN_FORM: "false"
+      OAUTH_MERGE_ACCOUNTS_BY_EMAIL: "true"
+      OAUTH_UPDATE_PICTURE_ON_LOGIN: "true"
+      MICROSOFT_CLIENT_ID: ${MICROSOFT_CLIENT_ID}
+      MICROSOFT_CLIENT_SECRET: ${MICROSOFT_CLIENT_SECRET}
+      MICROSOFT_CLIENT_TENANT_ID: ${MICROSOFT_CLIENT_TENANT_ID}
+    volumes:
+      - open_webui_data:/app/backend/data
+      - ./favicon.png:/app/build/static/favicon.png:ro
+      - ./favicon.png:/app/build/static/favicon-96x96.png:ro
+      - ./favicon.png:/app/build/static/favicon.ico:ro
+      - ./favicon.png:/app/build/static/favicon.svg:ro
+      - ./favicon.png:/app/build/favicon.png:ro
+    deploy:
+      resources:
+        limits:
+          cpus: ${OPEN_WEBUI_CPU_LIMIT:-2}
+          memory: ${OPEN_WEBUI_MEMORY_LIMIT:-2G}
+        reservations:
+          cpus: ${OPEN_WEBUI_CPU_RESERVATION:-0.5}
+          memory: ${OPEN_WEBUI_MEMORY_RESERVATION:-512M}
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: dv-ai-pgadmin
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@libeara.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: "True"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./pgadmin-servers.json/servers.json:/pgadmin4/servers.json:ro
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 128M
+
+volumes:
+  postgres_data:
+  open_webui_data:
+  pgadmin_data:

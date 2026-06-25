@@ -1,0 +1,56 @@
+model_list:
+  - model_name: claude-sonnet-4-5
+    litellm_params:
+      model: anthropic/claude-sonnet-4-5
+      api_base: os.environ/AZURE_CLAUDE_ENDPOINT
+      api_key: os.environ/AZURE_AI_API_KEY
+      extra_headers:
+        Authorization: os.environ/AZURE_BEARER_AUTH
+        anthropic-version: "2023-06-01"
+
+  - model_name: claude-opus-4-6
+    litellm_params:
+      model: anthropic/claude-opus-4-6
+      api_base: os.environ/AZURE_CLAUDE_ENDPOINT
+      api_key: os.environ/AZURE_AI_API_KEY
+      extra_headers:
+        Authorization: os.environ/AZURE_BEARER_AUTH
+        anthropic-version: "2023-06-01"
+
+  - model_name: gpt-4.1
+    litellm_params:
+      model: azure/gpt-4.1
+      api_base: os.environ/AZURE_OPENAI_ENDPOINT
+      api_key: os.environ/AZURE_AI_API_KEY
+      api_version: "2024-12-01-preview"
+
+  - model_name: gpt-4.1-mini
+    litellm_params:
+      model: azure/gpt-4.1-mini
+      api_base: os.environ/AZURE_OPENAI_ENDPOINT
+      api_key: os.environ/AZURE_AI_API_KEY
+      api_version: "2024-12-01-preview"
+
+  - model_name: gpt-4o
+    litellm_params:
+      model: azure/gpt-4o
+      api_base: os.environ/AZURE_OPENAI_ENDPOINT
+      api_key: os.environ/AZURE_AI_API_KEY
+      api_version: "2024-12-01-preview"
+
+  - model_name: gpt-4o-mini
+    litellm_params:
+      model: azure/gpt-4o-mini
+      api_base: os.environ/AZURE_OPENAI_ENDPOINT
+      api_key: os.environ/AZURE_AI_API_KEY
+      api_version: "2024-12-01-preview"
+
+  - model_name: text-embedding-3-small
+    litellm_params:
+      model: azure/text-embedding-3-small
+      api_base: os.environ/AZURE_OPENAI_ENDPOINT
+      api_key: os.environ/AZURE_AI_API_KEY
+      api_version: "2024-12-01-preview"
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY

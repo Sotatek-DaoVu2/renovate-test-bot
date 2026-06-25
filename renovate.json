@@ -1,0 +1,30 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "schedule": ["every 1 hour after 9am and before 6pm every weekday"],
+  "timezone": "Asia/Singapore",
+  "enabledManagers": ["docker-compose", "terraform"],
+  "packageRules": [
+    {
+      "description": "Auto-merge patch updates for Docker images",
+      "matchDatasources": ["docker"],
+      "matchUpdateTypes": ["patch"],
+      "automerge": true,
+      "automergeType": "pr",
+      "automergeStrategy": "squash"
+    },
+    {
+      "description": "Do not touch images using non-semver tags (main, latest, etc.)",
+      "matchDatasources": ["docker"],
+      "matchCurrentVersion": "/^(main|latest|main-latest)/",
+      "enabled": false
+    },
+    {
+      "description": "Minor and major updates require manual review",
+      "matchDatasources": ["docker"],
+      "matchUpdateTypes": ["minor", "major"],
+      "automerge": false,
+      "labels": ["dependencies", "docker"]
+    }
+  ]
+}

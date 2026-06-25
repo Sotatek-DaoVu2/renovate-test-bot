@@ -1,0 +1,37 @@
+# Environment variables (contains secrets)
+.env
+
+# Docker volumes / data
+postgres_data/
+open_webui_data/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.idea/
+.vscode/
+.cursor/
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# Logs
+*.log
+ 
+# Open WebUI Pipelines runtime valves (managed in UI)
+pipelines/audit_pipeline/
+
+# terraform 
+.terraform*
+*.tfstate*
