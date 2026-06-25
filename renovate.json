@@ -14,8 +14,8 @@
     }
   ],
   "separateMinorPatch": true,
+  "platformAutomerge": true,
   "packageRules": [
-    
     {
       "description": "Patch updates for Docker images",
       "matchDatasources": ["docker"],
