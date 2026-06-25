@@ -6,25 +6,17 @@
   "enabledManagers": ["docker-compose", "terraform"],
   "packageRules": [
     {
-      "description": "Auto-merge patch updates for Docker images",
+      "description": "Patch updates for Docker images",
       "matchDatasources": ["docker"],
       "matchUpdateTypes": ["patch"],
-      "automerge": true,
-      "automergeType": "pr",
-      "automergeStrategy": "squash"
+      "automerge": false,
+      "labels": ["dependencies", "docker", "patch"]
     },
     {
       "description": "Do not touch images using non-semver tags (main, latest, etc.)",
       "matchDatasources": ["docker"],
       "matchCurrentVersion": "/^(main|latest|main-latest)/",
       "enabled": false
-    },
-    {
-      "description": "Minor and major updates require manual review",
-      "matchDatasources": ["docker"],
-      "matchUpdateTypes": ["minor", "major"],
-      "automerge": false,
-      "labels": ["dependencies", "docker"]
     }
   ]
 }
