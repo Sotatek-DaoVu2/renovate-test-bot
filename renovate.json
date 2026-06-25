@@ -13,6 +13,11 @@
       "labels": ["dependencies", "docker", "patch"]
     },
     {
+      "description": "Disable minor and major updates",
+      "matchUpdateTypes": ["minor", "major"],
+      "enabled": false
+    },
+    {
       "description": "Do not touch images using non-semver tags (main, latest, etc.)",
       "matchDatasources": ["docker"],
       "matchCurrentVersion": "/^(main|latest|main-latest)/",
