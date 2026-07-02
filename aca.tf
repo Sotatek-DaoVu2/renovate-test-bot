@@ -91,7 +91,7 @@ resource "azurerm_container_app" "lbr-gpt-aca" {
 
     container {
       name   = "lbr-gpt-aca-container"
-      image  = "ghcr.io/open-webui/open-webui:v0.8.6"
+      image  = "ghcr.io/open-webui/open-webui:v0.10.2"
       cpu    = 0.5
       memory = "1Gi"
 
